@@ -1,26 +1,249 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Light theme colors - Design System Tokens */
+  --background: 255 255 255;           /* #ffffff */
+  --foreground: 15 23 42;              /* #0f172a */
+  --surface: 248 250 252;              /* #f8fafc */
+  --surface-elevated: 241 245 249;     /* #f1f5f9 */
+  --border: 0 0 0;                     /* #000000 */
+  --input: 255 255 255;                /* #ffffff */
+  --ring: 59 130 246;                  /* #3b82f6 */
+  
+  /* Text colors */
+  --text-primary: 15 23 42;            /* #0f172a */
+  --text-secondary: 100 116 139;       /* #64748b */
+  
+  /* Semantic colors */
+  --primary: 59 130 246;               /* #3b82f6 */
+  --primary-foreground: 255 255 255;   /* #ffffff */
+  --secondary: 241 245 249;            /* #f1f5f9 */
+  --secondary-foreground: 15 23 42;    /* #0f172a */
+  --accent: 59 130 246;                /* #3b82f6 */
+  --accent-foreground: 255 255 255;    /* #ffffff */
+  --success: 16 185 129;               /* #10b981 */
+  --success-foreground: 255 255 255;   /* #ffffff */
+  --warning: 245 158 11;               /* #f59e0b */
+  --warning-foreground: 255 255 255;   /* #ffffff */
+  --error: 239 68 68;                  /* #ef4444 */
+  --error-foreground: 255 255 255;     /* #ffffff */
+  
+  /* Component colors */
+  --muted: 248 250 252;                /* #f8fafc */
+  --muted-foreground: 100 116 139;     /* #64748b */
+  --card: 255 255 255;                 /* #ffffff */
+  --card-foreground: 15 23 42;         /* #0f172a */
+  --popover: 255 255 255;              /* #ffffff */
+  --popover-foreground: 15 23 42;      /* #0f172a */
+  --destructive: 239 68 68;            /* #ef4444 */
+  --destructive-foreground: 255 255 255; /* #ffffff */
+  
+  /* Border radius */
+  --radius: 0.5rem;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.dark {
+  /* Dark theme colors - Design System Tokens */
+  --background: 10 10 10;              /* #0a0a0a */
+  --foreground: 248 250 252;           /* #f8fafc */
+  --surface: 26 26 26;                 /* #1a1a1a */
+  --surface-elevated: 42 42 42;        /* #2a2a2a */
+  --border: 51 51 51;                  /* #333333 */
+  --input: 30 41 59;                   /* #1e293b */
+  --ring: 59 130 246;                  /* #3b82f6 */
+  
+  /* Text colors */
+  --text-primary: 255 255 255;         /* #ffffff */
+  --text-secondary: 163 163 163;       /* #a3a3a3 */
+  
+  /* Semantic colors */
+  --primary: 59 130 246;               /* #3b82f6 */
+  --primary-foreground: 2 6 23;        /* #020617 */
+  --secondary: 30 41 59;               /* #1e293b */
+  --secondary-foreground: 248 250 252; /* #f8fafc */
+  --accent: 59 130 246;                /* #3b82f6 */
+  --accent-foreground: 248 250 252;    /* #f8fafc */
+  --success: 16 185 129;               /* #10b981 */
+  --success-foreground: 2 6 23;        /* #020617 */
+  --warning: 245 158 11;               /* #f59e0b */
+  --warning-foreground: 2 6 23;        /* #020617 */
+  --error: 239 68 68;                  /* #ef4444 */
+  --error-foreground: 248 250 252;     /* #f8fafc */
+  
+  /* Component colors */
+  --muted: 15 23 42;                   /* #0f172a */
+  --muted-foreground: 148 163 184;     /* #94a3b8 */
+  --card: 15 23 42;                    /* #0f172a */
+  --card-foreground: 248 250 252;      /* #f8fafc */
+  --popover: 15 23 42;                 /* #0f172a */
+  --popover-foreground: 248 250 252;   /* #f8fafc */
+  --destructive: 239 68 68;            /* #ef4444 */
+  --destructive-foreground: 248 250 252; /* #f8fafc */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  border-color: hsl(var(--border));
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-feature-settings: 'cv11', 'ss01';
+  font-variation-settings: 'opsz' 32;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* Focus styles */
+.focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* Animation utilities */
+.animate-in {
+  animation-duration: 0.2s;
+  animation-fill-mode: both;
+}
+
+.fade-in {
+  animation-name: fadeIn;
+}
+
+.slide-in-from-top {
+  animation-name: slideInFromTop;
+}
+
+.slide-in-from-bottom {
+  animation-name: slideInFromBottom;
+}
+
+.slide-in-from-left {
+  animation-name: slideInFromLeft;
+}
+
+.slide-in-from-right {
+  animation-name: slideInFromRight;
+}
+
+/* Shimmer effect for loading skeletons */
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    hsl(var(--muted-foreground) / 0.1),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+  content: '';
+}
+
+/* Smooth transitions for theme switching */
+* {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInFromBottom {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
