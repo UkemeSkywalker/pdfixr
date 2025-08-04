@@ -32,3 +32,6 @@ export {
 
 // Theme Components
 export { ThemeToggle } from "./theme-toggle"
+
+// Color Components
+export { ColorPicker } from "./color-picker"

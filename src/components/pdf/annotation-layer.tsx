@@ -2,6 +2,8 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react'
 import { CanvasOverlay, AnnotationData, AnnotationTool } from './canvas-overlay'
+import { TextNote } from './text-note'
+import { ShapeDrawer } from './shape-drawer'
 import { pdfToCanvas, canvasToPdf, createViewportTransform, PageDimensions } from './coordinate-mapper'
 import { cn } from '@/utils/cn'
 
@@ -24,6 +26,7 @@ interface AnnotationLayerProps {
 interface AnnotationLayerState {
   selectedAnnotations: string[]
   hoveredAnnotation: string | null
+  editingAnnotation: string | null
   isDragging: boolean
   dragOffset: { x: number; y: number }
 }
@@ -46,6 +49,7 @@ export function AnnotationLayer({
   const [state, setState] = useState<AnnotationLayerState>({
     selectedAnnotations: [],
     hoveredAnnotation: null,
+    editingAnnotation: null,
     isDragging: false,
     dragOffset: { x: 0, y: 0 },
   })
@@ -76,6 +80,19 @@ export function AnnotationLayer({
   // Handle annotation hover
   const handleAnnotationHover = useCallback((annotationId: string | null) => {
     setState(prev => ({ ...prev, hoveredAnnotation: annotationId }))
+  }, [])
+
+  // Handle annotation editing
+  const handleStartEdit = useCallback((annotationId: string) => {
+    setState(prev => ({ 
+      ...prev, 
+      editingAnnotation: annotationId,
+      selectedAnnotations: [annotationId]
+    }))
+  }, [])
+
+  const handleEndEdit = useCallback(() => {
+    setState(prev => ({ ...prev, editingAnnotation: null }))
   }, [])
 
   // Handle annotation addition from canvas
@@ -121,7 +138,12 @@ export function AnnotationLayer({
         break
       
       case 'Escape':
-        setState(prev => ({ ...prev, selectedAnnotations: [], hoveredAnnotation: null }))
+        setState(prev => ({ 
+          ...prev, 
+          selectedAnnotations: [], 
+          hoveredAnnotation: null,
+          editingAnnotation: null
+        }))
         break
       
       case 'a':
@@ -221,6 +243,27 @@ export function AnnotationLayer({
     ))
   }
 
+  // Render text notes
+  const renderTextNotes = () => {
+    return pageAnnotations
+      .filter(annotation => annotation.type === 'note')
+      .map(annotation => (
+        <TextNote
+          key={annotation.id}
+          annotation={annotation}
+          scale={scale}
+          isSelected={state.selectedAnnotations.includes(annotation.id)}
+          isEditing={state.editingAnnotation === annotation.id}
+          onUpdate={onAnnotationUpdate}
+          onDelete={onAnnotationDelete}
+          onStartEdit={() => handleStartEdit(annotation.id)}
+          onEndEdit={handleEndEdit}
+          onSelect={() => handleAnnotationSelect(annotation.id)}
+          disabled={disabled}
+        />
+      ))
+  }
+
   return (
     <div
       ref={layerRef}
@@ -233,21 +276,36 @@ export function AnnotationLayer({
         height: pageDimensions.height * scale,
       }}
     >
-      {/* Canvas overlay for drawing */}
-      <CanvasOverlay
-        width={pageDimensions.width}
-        height={pageDimensions.height}
-        scale={scale}
-        rotation={rotation}
+      {/* Shape drawer for drawing shapes */}
+      <ShapeDrawer
         pageNumber={pageNumber}
-        annotations={canvasAnnotations}
         selectedTool={selectedTool}
+        scale={scale}
         onAnnotationAdd={handleCanvasAnnotationAdd}
-        onAnnotationUpdate={handleCanvasAnnotationUpdate}
-        onAnnotationDelete={onAnnotationDelete}
         disabled={disabled}
         className="pointer-events-auto"
       />
+
+      {/* Canvas overlay temporarily disabled due to Fabric.js issues */}
+      {false && (
+        <CanvasOverlay
+          width={pageDimensions.width}
+          height={pageDimensions.height}
+          scale={scale}
+          rotation={rotation}
+          pageNumber={pageNumber}
+          annotations={canvasAnnotations.filter(ann => ann.type !== 'note')}
+          selectedTool={selectedTool}
+          onAnnotationAdd={handleCanvasAnnotationAdd}
+          onAnnotationUpdate={handleCanvasAnnotationUpdate}
+          onAnnotationDelete={onAnnotationDelete}
+          disabled={disabled}
+          className="pointer-events-auto"
+        />
+      )}
+
+      {/* Text notes overlay */}
+      {renderTextNotes()}
 
       {/* Annotation bounds (for debugging) */}
       {renderAnnotationBounds()}

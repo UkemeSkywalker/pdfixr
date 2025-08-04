@@ -63,9 +63,9 @@
     - Create annotation layer management system
     - _Requirements: 2.1, 2.2, 2.3, 2.4_
 
-- [ ] 5. Build annotation system with drawing tools
+- [x] 5. Build annotation system with drawing tools
 
-  - [ ] 5.1 Implement text selection and highlighting
+  - [x] 5.1 Implement text selection and highlighting
 
     - Create text selection detection on PDF pages
     - Build highlight, underline, and strikethrough tools
@@ -73,7 +73,7 @@
     - Implement annotation persistence and serialization
     - _Requirements: 2.1, 2.2_
 
-  - [ ] 5.2 Create text notes and shape drawing tools
+  - [x] 5.2 Create text notes and shape drawing tools
     - Build text note component with positioning
     - Implement shape drawing tools (rectangle, circle, arrow)
     - Add annotation editing and deletion functionality

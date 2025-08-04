@@ -1,14 +1,14 @@
-'use client'
+"use client";
 
-import React, { useState, useCallback } from 'react'
-import { 
-  MousePointer, 
-  Highlighter, 
-  Underline, 
-  Strikethrough, 
-  StickyNote, 
-  Square, 
-  Circle, 
+import React, { useState, useCallback } from "react";
+import {
+  MousePointer,
+  Highlighter,
+  Underline,
+  Strikethrough,
+  StickyNote,
+  Square,
+  Circle,
   ArrowRight,
   Type,
   Image,
@@ -17,97 +17,109 @@ import {
   ZoomOut,
   RotateCcw,
   RotateCw,
-  Palette
-} from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/utils/cn'
-import * as Tooltip from '@radix-ui/react-tooltip'
+  Palette,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/utils/cn";
+import * as Tooltip from "@radix-ui/react-tooltip";
 // Simple separator component
 const Separator = ({ className }: { className?: string }) => (
-  <div className={cn('bg-border', className)} />
-)
+  <div className={cn("bg-border", className)} />
+);
 
-export type AnnotationTool = 
-  | 'select'
-  | 'highlight' 
-  | 'underline' 
-  | 'strikethrough' 
-  | 'note' 
-  | 'rectangle' 
-  | 'circle' 
-  | 'arrow'
-  | 'text'
-  | 'image'
+export type AnnotationTool =
+  | "select"
+  | "highlight"
+  | "underline"
+  | "strikethrough"
+  | "note"
+  | "rectangle"
+  | "circle"
+  | "arrow"
+  | "text"
+  | "image";
 
-export type ToolGroup = 'selection' | 'annotation' | 'shapes' | 'content' | 'actions' | 'zoom'
+export type ToolGroup =
+  | "selection"
+  | "annotation"
+  | "shapes"
+  | "content"
+  | "actions"
+  | "zoom";
 
 interface ToolbarProps {
-  activeTool: AnnotationTool
-  onToolChange: (tool: AnnotationTool) => void
-  onUndo?: () => void
-  onRedo?: () => void
-  onZoomIn?: () => void
-  onZoomOut?: () => void
-  onExport?: () => void
-  onColorChange?: (color: string) => void
-  canUndo?: boolean
-  canRedo?: boolean
-  zoomLevel?: number
-  className?: string
-  position?: 'top' | 'bottom'
-  isFloating?: boolean
+  activeTool: AnnotationTool;
+  onToolChange: (tool: AnnotationTool) => void;
+  onUndo?: () => void;
+  onRedo?: () => void;
+  onZoomIn?: () => void;
+  onZoomOut?: () => void;
+  onExport?: () => void;
+  onColorChange?: (color: string) => void;
+  canUndo?: boolean;
+  canRedo?: boolean;
+  zoomLevel?: number;
+  className?: string;
+  position?: "top" | "bottom";
+  isFloating?: boolean;
 }
 
-const toolGroups: Record<ToolGroup, { tools: AnnotationTool[]; label: string }> = {
+const toolGroups: Record<
+  ToolGroup,
+  { tools: AnnotationTool[]; label: string }
+> = {
   selection: {
-    tools: ['select'],
-    label: 'Selection'
+    tools: ["select"],
+    label: "Selection",
   },
   annotation: {
-    tools: ['highlight', 'underline', 'strikethrough', 'note'],
-    label: 'Annotations'
+    tools: ["highlight", "underline", "strikethrough", "note"],
+    label: "Annotations",
   },
   shapes: {
-    tools: ['rectangle', 'circle', 'arrow'],
-    label: 'Shapes'
+    tools: ["rectangle", "circle", "arrow"],
+    label: "Shapes",
   },
   content: {
-    tools: ['text', 'image'],
-    label: 'Content'
+    tools: ["text", "image"],
+    label: "Content",
   },
   actions: {
     tools: [],
-    label: 'Actions'
+    label: "Actions",
   },
   zoom: {
     tools: [],
-    label: 'Zoom'
-  }
-}
+    label: "Zoom",
+  },
+};
 
-const toolConfig: Record<AnnotationTool, { icon: React.ComponentType<any>; label: string; shortcut?: string }> = {
-  select: { icon: MousePointer, label: 'Select', shortcut: 'V' },
-  highlight: { icon: Highlighter, label: 'Highlight', shortcut: 'H' },
-  underline: { icon: Underline, label: 'Underline', shortcut: 'U' },
-  strikethrough: { icon: Strikethrough, label: 'Strikethrough', shortcut: 'S' },
-  note: { icon: StickyNote, label: 'Note', shortcut: 'N' },
-  rectangle: { icon: Square, label: 'Rectangle', shortcut: 'R' },
-  circle: { icon: Circle, label: 'Circle', shortcut: 'C' },
-  arrow: { icon: ArrowRight, label: 'Arrow', shortcut: 'A' },
-  text: { icon: Type, label: 'Text', shortcut: 'T' },
-  image: { icon: Image, label: 'Image', shortcut: 'I' }
-}
+const toolConfig: Record<
+  AnnotationTool,
+  { icon: React.ComponentType<unknown>; label: string; shortcut?: string }
+> = {
+  select: { icon: MousePointer, label: "Select", shortcut: "V" },
+  highlight: { icon: Highlighter, label: "Highlight", shortcut: "H" },
+  underline: { icon: Underline, label: "Underline", shortcut: "U" },
+  strikethrough: { icon: Strikethrough, label: "Strikethrough", shortcut: "S" },
+  note: { icon: StickyNote, label: "Note", shortcut: "N" },
+  rectangle: { icon: Square, label: "Rectangle", shortcut: "R" },
+  circle: { icon: Circle, label: "Circle", shortcut: "C" },
+  arrow: { icon: ArrowRight, label: "Arrow", shortcut: "A" },
+  text: { icon: Type, label: "Text", shortcut: "T" },
+  image: { icon: Image, label: "Image", shortcut: "I" },
+};
 
 const colorOptions = [
-  '#ef4444', // red
-  '#f97316', // orange  
-  '#eab308', // yellow
-  '#22c55e', // green
-  '#3b82f6', // blue
-  '#8b5cf6', // purple
-  '#ec4899', // pink
-  '#000000', // black
-]
+  "#ef4444", // red
+  "#f97316", // orange
+  "#eab308", // yellow
+  "#22c55e", // green
+  "#3b82f6", // blue
+  "#8b5cf6", // purple
+  "#ec4899", // pink
+  "#000000", // black
+];
 
 export function Toolbar({
   activeTool,
@@ -122,79 +134,88 @@ export function Toolbar({
   canRedo = false,
   zoomLevel = 100,
   className,
-  position = 'top',
-  isFloating = true
+  position = "top",
+  isFloating = true,
 }: ToolbarProps) {
-  const [selectedColor, setSelectedColor] = useState('#ef4444')
-  const [showColorPicker, setShowColorPicker] = useState(false)
+  const [selectedColor, setSelectedColor] = useState("#ef4444");
+  const [showColorPicker, setShowColorPicker] = useState(false);
 
-  const handleToolSelect = useCallback((tool: AnnotationTool) => {
-    onToolChange(tool)
-  }, [onToolChange])
+  const handleToolSelect = useCallback(
+    (tool: AnnotationTool) => {
+      onToolChange(tool);
+    },
+    [onToolChange]
+  );
 
-  const handleColorSelect = useCallback((color: string) => {
-    setSelectedColor(color)
-    onColorChange?.(color)
-    setShowColorPicker(false)
-  }, [onColorChange])
+  const handleColorSelect = useCallback(
+    (color: string) => {
+      setSelectedColor(color);
+      onColorChange?.(color);
+      setShowColorPicker(false);
+    },
+    [onColorChange]
+  );
 
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (e.metaKey || e.ctrlKey) {
-      switch (e.key.toLowerCase()) {
-        case 'z':
-          e.preventDefault()
-          if (e.shiftKey) {
-            onRedo?.()
-          } else {
-            onUndo?.()
-          }
-          break
-        case '=':
-        case '+':
-          e.preventDefault()
-          onZoomIn?.()
-          break
-        case '-':
-          e.preventDefault()
-          onZoomOut?.()
-          break
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey) {
+        switch (e.key.toLowerCase()) {
+          case "z":
+            e.preventDefault();
+            if (e.shiftKey) {
+              onRedo?.();
+            } else {
+              onUndo?.();
+            }
+            break;
+          case "=":
+          case "+":
+            e.preventDefault();
+            onZoomIn?.();
+            break;
+          case "-":
+            e.preventDefault();
+            onZoomOut?.();
+            break;
+        }
+        return;
       }
-      return
-    }
 
-    // Tool shortcuts
-    const toolEntry = Object.entries(toolConfig).find(([_, config]) => 
-      config.shortcut?.toLowerCase() === e.key.toLowerCase()
-    )
-    if (toolEntry) {
-      e.preventDefault()
-      handleToolSelect(toolEntry[0] as AnnotationTool)
-    }
-  }, [onUndo, onRedo, onZoomIn, onZoomOut, handleToolSelect])
+      // Tool shortcuts
+      const toolEntry = Object.entries(toolConfig).find(
+        ([_, config]) => config.shortcut?.toLowerCase() === e.key.toLowerCase()
+      );
+      if (toolEntry) {
+        e.preventDefault();
+        handleToolSelect(toolEntry[0] as AnnotationTool);
+      }
+    },
+    [onUndo, onRedo, onZoomIn, onZoomOut, handleToolSelect]
+  );
 
   // Add keyboard event listeners
   React.useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [handleKeyDown])
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
 
   const ToolButton = ({ tool }: { tool: AnnotationTool }) => {
-    const config = toolConfig[tool]
-    const Icon = config.icon
-    const isActive = activeTool === tool
+    const config = toolConfig[tool];
+    const Icon = config.icon;
+    const isActive = activeTool === tool;
 
     return (
       <Tooltip.Provider>
         <Tooltip.Root>
           <Tooltip.Trigger asChild>
             <Button
-              variant={isActive ? 'default' : 'ghost'}
+              variant={isActive ? "default" : "ghost"}
               size="sm"
               onClick={() => handleToolSelect(tool)}
               className={cn(
-                'h-9 w-9 p-0 transition-all duration-200',
-                isActive && 'bg-primary text-primary-foreground shadow-sm',
-                !isActive && 'hover:bg-accent hover:text-accent-foreground'
+                "h-9 w-9 p-0 transition-all duration-200",
+                isActive && "bg-primary text-primary-foreground shadow-sm",
+                !isActive && "hover:bg-accent hover:text-accent-foreground"
               )}
             >
               <Icon className="h-4 w-4" />
@@ -217,24 +238,24 @@ export function Toolbar({
           </Tooltip.Portal>
         </Tooltip.Root>
       </Tooltip.Provider>
-    )
-  }
+    );
+  };
 
   return (
     <div
       className={cn(
-        'flex items-center gap-1 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-2 border-border rounded-lg shadow-lg',
-        isFloating && 'fixed left-1/2 transform -translate-x-1/2 z-40',
-        position === 'top' && isFloating && 'top-20',
-        position === 'bottom' && isFloating && 'bottom-6',
-        !isFloating && 'relative',
+        "flex items-center gap-1 bg-white border-2 border-gray-200 rounded-lg shadow-lg",
+        isFloating && "fixed left-1/2 transform -translate-x-1/2 z-40",
+        position === "top" && isFloating && "top-20",
+        position === "bottom" && isFloating && "bottom-6",
+        !isFloating && "relative",
         className
       )}
     >
       <div className="flex items-center gap-1 p-2">
         {/* Selection Tools */}
         <div className="flex items-center gap-1">
-          {toolGroups.selection.tools.map(tool => (
+          {toolGroups.selection.tools.map((tool) => (
             <ToolButton key={tool} tool={tool} />
           ))}
         </div>
@@ -243,7 +264,7 @@ export function Toolbar({
 
         {/* Annotation Tools */}
         <div className="flex items-center gap-1">
-          {toolGroups.annotation.tools.map(tool => (
+          {toolGroups.annotation.tools.map((tool) => (
             <ToolButton key={tool} tool={tool} />
           ))}
         </div>
@@ -252,7 +273,7 @@ export function Toolbar({
 
         {/* Shape Tools */}
         <div className="flex items-center gap-1">
-          {toolGroups.shapes.tools.map(tool => (
+          {toolGroups.shapes.tools.map((tool) => (
             <ToolButton key={tool} tool={tool} />
           ))}
         </div>
@@ -261,7 +282,7 @@ export function Toolbar({
 
         {/* Content Tools */}
         <div className="flex items-center gap-1">
-          {toolGroups.content.tools.map(tool => (
+          {toolGroups.content.tools.map((tool) => (
             <ToolButton key={tool} tool={tool} />
           ))}
         </div>
@@ -270,7 +291,10 @@ export function Toolbar({
 
         {/* Color Picker */}
         <Tooltip.Provider>
-          <Tooltip.Root open={showColorPicker} onOpenChange={setShowColorPicker}>
+          <Tooltip.Root
+            open={showColorPicker}
+            onOpenChange={setShowColorPicker}
+          >
             <Tooltip.Trigger asChild>
               <Button
                 variant="ghost"
@@ -279,7 +303,7 @@ export function Toolbar({
                 onClick={() => setShowColorPicker(!showColorPicker)}
               >
                 <Palette className="h-4 w-4" />
-                <div 
+                <div
                   className="absolute bottom-1 right-1 w-2 h-2 rounded-full border border-background"
                   style={{ backgroundColor: selectedColor }}
                 />
@@ -292,12 +316,14 @@ export function Toolbar({
                 sideOffset={5}
               >
                 <div className="grid grid-cols-4 gap-1">
-                  {colorOptions.map(color => (
+                  {colorOptions.map((color) => (
                     <button
                       key={color}
                       className={cn(
-                        'w-6 h-6 rounded border-2 transition-all hover:scale-110',
-                        selectedColor === color ? 'border-primary' : 'border-transparent'
+                        "w-6 h-6 rounded border-2 transition-all hover:scale-110",
+                        selectedColor === color
+                          ? "border-primary"
+                          : "border-transparent"
                       )}
                       style={{ backgroundColor: color }}
                       onClick={() => handleColorSelect(color)}
@@ -459,5 +485,5 @@ export function Toolbar({
         </Tooltip.Provider>
       </div>
     </div>
-  )
+  );
 }

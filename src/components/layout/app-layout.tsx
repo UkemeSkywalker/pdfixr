@@ -4,8 +4,11 @@ import React, { useState } from 'react'
 import { Header } from './header'
 import { Toolbar, AnnotationTool } from './toolbar'
 import { Sidebar } from './sidebar'
+import { AnnotationDemo } from '@/components/pdf/annotation-demo'
+import { SimplePDFViewer } from '@/components/pdf/simple-pdf-viewer'
 import { useToolbar } from '@/hooks/use-toolbar'
 import { useSidebar } from '@/hooks/use-sidebar'
+import { AnnotationTool as AnnotationToolData } from '@/types'
 import { cn } from '@/utils/cn'
 
 interface AppLayoutProps {
@@ -51,6 +54,7 @@ const mockAnnotations = [
 
 export function AppLayout({ children, className }: AppLayoutProps) {
   const [currentFile, setCurrentFile] = useState<File | null>(null)
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [selectedAnnotation, setSelectedAnnotation] = useState<string>()
 
@@ -79,9 +83,28 @@ export function AppLayout({ children, className }: AppLayoutProps) {
   } = useSidebar()
 
   const handleFileUpload = (file: File) => {
+    // Clean up previous URL if it exists
+    if (pdfUrl) {
+      URL.revokeObjectURL(pdfUrl)
+    }
+    
     setCurrentFile(file)
+    
+    // Create object URL for the PDF file
+    const url = URL.createObjectURL(file)
+    setPdfUrl(url)
+    
     console.log('File uploaded:', file.name)
   }
+
+  // Cleanup effect for object URL
+  React.useEffect(() => {
+    return () => {
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl)
+      }
+    }
+  }, [pdfUrl])
 
   const handleSave = () => {
     console.log('Save clicked')
@@ -144,7 +167,24 @@ export function AppLayout({ children, className }: AppLayoutProps) {
 
         {/* Main Content */}
         <div className="flex-1 relative">
-          {children}
+          {pdfUrl ? (
+            <AnnotationDemo 
+              pdfUrl={pdfUrl}
+              selectedTool={{
+                type: activeTool as AnnotationToolData['type'],
+                color: selectedColor,
+                strokeWidth: 2,
+                opacity: 0.8,
+              }}
+              onToolChange={(tool) => setActiveTool(tool.type as AnnotationTool)}
+              onUndo={undo}
+              onRedo={redo}
+              canUndo={canUndo}
+              canRedo={canRedo}
+            />
+          ) : (
+            children
+          )}
           
           {/* Floating Toolbar - only show when file is loaded */}
           {currentFile && (

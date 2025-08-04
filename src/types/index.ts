@@ -16,6 +16,54 @@ export interface PDFPage {
   rotation: number
 }
 
+// Text selection types
+export interface TextSelection {
+  id: string
+  text: string
+  pageNumber: number
+  boundingBoxes: BoundingBox[]
+  startOffset: number
+  endOffset: number
+  containerElement: HTMLElement
+}
+
+export interface BoundingBox {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+// Annotation types
+export interface AnnotationData {
+  id: string
+  type: 'highlight' | 'underline' | 'strikethrough' | 'note' | 'rectangle' | 'circle' | 'arrow' | 'freehand'
+  pageNumber: number
+  coordinates: {
+    x: number
+    y: number
+    width?: number
+    height?: number
+    points?: number[]
+  }
+  style: {
+    color: string
+    strokeWidth: number
+    opacity: number
+    fontSize?: number
+  }
+  content?: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface AnnotationTool {
+  type: AnnotationData['type']
+  color: string
+  strokeWidth: number
+  opacity: number
+}
+
 // Editor types
 export interface EditorTool {
   id: string
